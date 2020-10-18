@@ -1,0 +1,50 @@
+name: stator
+
+static_sites:
+  - name: webapp
+    environment_slug: html
+    github:
+      repo: chocolat-chaud-io/stator
+      branch: 3-automated-deployment
+      deploy_on_push: true
+    build_command: npm run build webapp -- --prod
+    output_dir: /dist/apps/webapp
+    envs:
+      - key: API_URL
+        value: ${api.PUBLIC_URL}
+    routes:
+      - path: /
+
+services:
+  - name: api
+    environment_slug: node-js
+    github:
+      repo: chocolat-chaud-io/stator
+      branch: 3-automated-deployment
+      deploy_on_push: true
+    build_command: npm run build api -- --prod
+    run_command: node dist/apps/api/main.js
+    http_port: 3333
+    envs:
+      - key: API_URL
+        value: ${_self.PUBLIC_URL}
+      - key: DATABASE_HOST
+        value: ${database.HOSTNAME}
+      - key: DATABASE_PORT
+        value: ${database.PORT}
+      - key: DATABASE_NAME
+        value: ${database.DATABASE}
+      - key: DATABASE_USERNAME
+        value: ${database.USERNAME}
+      - key: DATABASE_PASSWORD
+        value: ${database.PASSWORD}
+      - key: DATABASE_CA_CERT
+        value: ${database.CA_CERT}
+    routes:
+      - path: /api
+    health_check:
+      http_path: /health
+
+databases:
+  - name: database
+    engine: PG

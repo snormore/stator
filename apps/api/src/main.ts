@@ -10,6 +10,7 @@ async function bootstrap() {
   const fastifyOptions = { logger: true }
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(fastifyOptions))
+  app.enableShutdownHooks()
   app.enableCors({ origin: true })
   app.setGlobalPrefix(globalPrefix)
 
